@@ -1,5 +1,6 @@
 package com.practice.deparmentservice.controller;
 
+import com.practice.deparmentservice.client.EmployeeClient;
 import com.practice.deparmentservice.model.Department;
 import com.practice.deparmentservice.repository.DepartmentRepository;
 import org.slf4j.Logger;
@@ -19,6 +20,9 @@ public class DepartmentController {
     @Autowired
     private DepartmentRepository repository;
 
+    @Autowired
+    private EmployeeClient employeeClient;
+
     @PostMapping
     public Department add(@RequestBody Department department){
         LOGGER.info("Department add: {}", department);
@@ -29,6 +33,17 @@ public class DepartmentController {
     public List<Department> findAll(){
         LOGGER.info("Department find");
         return repository.findAll();
+    }
+
+    @GetMapping("/with-employees")
+    public List<Department> findAllWithEmployees(){
+        LOGGER.info("Department find");
+        List<Department> departments
+            = repository.findAll();
+        departments.forEach(department ->
+                department.setEmployees(
+                        employeeClient.findByDepartment(department.getId())));
+        return departments;
     }
 
     @GetMapping("/{id}")
